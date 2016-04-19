@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SJToolsView: UIView {
+public class SJToolsView: UIView {
 
     /// 顶部工具条
     public private(set) lazy var topView: SJTopView = SJTopView()
@@ -29,13 +29,13 @@ class SJToolsView: UIView {
         InitializeUI()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         InitializeUI()
         
     }
 
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         topView.frame = CGRect(x: 0, y: 0, width: self.sj_width, height: 35)
         redialBtn.sj_size = CGSize(width: 60, height: 60)
@@ -55,8 +55,5 @@ extension SJToolsView {
 
 extension SJToolsView {
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        
-       
-    }
+   
 }

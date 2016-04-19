@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SJLable : UILabel {
+public class SJLable : UILabel {
     
     
     override init(frame: CGRect) {
@@ -16,7 +16,7 @@ class SJLable : UILabel {
         InitializeUI()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         InitializeUI()
         

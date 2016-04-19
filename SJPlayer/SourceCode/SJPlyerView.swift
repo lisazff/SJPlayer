@@ -9,8 +9,53 @@
 import UIKit
 import AVFoundation
 
+typealias backBlock = () -> ()
+
 /****************    公开方法      ************/
 extension SJPlyerView {
+    
+    /**
+     快速创建
+     
+     - parameter url:           url
+     - parameter isfileplay:    是否是播放本地资源
+     - parameter backOperation: 顶部返回按钮回调
+     
+     - returns: SJPlyerView
+     */
+    class func playVideoWithUrl(url: NSURL, isfileplay: Bool, backOperation: backBlock?) -> SJPlyerView {
+        
+        let playerView = SJPlyerView()
+        playerView.configSJPlayer(url)
+        playerView.url = url
+        playerView.isFilePlay = isfileplay
+        playerView.backOperation = backOperation
+        return playerView
+    }
+    /**
+     设置url
+     
+     - parameter url:        url
+     - parameter isfileplay: 是否是播放本地资源
+     */
+    public func setVideoURL(url: NSURL, isfileplay: Bool) {
+        configSJPlayer(url)
+        self.isFilePlay = isfileplay
+        self.url = url
+    }
+    /**
+     切换
+     
+     - parameter url:        url
+     - parameter isfileplay: 是否是播放本地资源
+     */
+    public func replaceWithURL(url: NSURL, isfileplay: Bool) {
+        isReplayed = true
+        self.isFilePlay = isfileplay
+        resetPlayer()
+        configSJPlayer(url)
+        Play()
+    }
     
     /**
      播放
@@ -18,6 +63,8 @@ extension SJPlyerView {
     public func Play() {
         
         player?.play()
+        isPlayed = true
+        toolsView.bottomView.playBtn.setImage(UIImage(named:pauseImageName), forState: .Normal)
     }
     /**
      暂停
@@ -26,39 +73,21 @@ extension SJPlyerView {
         player?.pause()
     }
     /**
-     重播
+     重置播放器
      */
-    public func Redial() {
-        repeatPlay()
-    }
     public func resetPlayer() {
         reset()
+        
     }
 }
 
-class SJPlyerView : UIView {
+public class SJPlyerView : UIView {
     
-    /****************    公开属性      ************/
-    public var url: NSURL? {
-        didSet {
-            if let url = url {
-            isFilePlay = false
-            configSJPlayer(url)
-            }
-        }
-    }
-    public var fileUrl: NSURL? {
-        didSet{
-            if let fileUrl = fileUrl {
-            isFilePlay = true
-            configSJPlayer(fileUrl)
-            }
-        }
-    }
-    /// 工具层
+    private var url: NSURL?
+    /// 操作层
     public private(set) lazy var toolsView: SJToolsView = SJToolsView()
 
-    public var player: AVPlayer? {
+    private var player: AVPlayer? {
         get {
             return (self.layer as! AVPlayerLayer).player
         }
@@ -72,14 +101,15 @@ class SJPlyerView : UIView {
     private var isPlayed = false
     private var isFilePlay: Bool?
     private var isFullScreen = false
+    private var isReplayed = false
     private var playStatusObserve: AnyObject?
     private lazy var dateFormatter = NSDateFormatter()
     private var playerItem: AVPlayerItem?
     private var playerLayer: AVPlayerLayer?
+    private var backOperation: backBlock?
     
     
-    
-    override class func layerClass() -> AnyClass {
+    override public class func layerClass() -> AnyClass {
         
         return AVPlayerLayer.self
     }
@@ -89,22 +119,22 @@ class SJPlyerView : UIView {
         InitializeUI()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         InitializeUI()
         
     }
     
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         toolsView.frame = self.bounds
     }
     
     deinit {
         print("销毁了")
-        resetPlayer()
         // 移除所有通知
-        removeObserver()
+        removeKVO()
+        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
 }
 
@@ -121,6 +151,8 @@ extension SJPlyerView {
         toolsView.bottomView.videoSliderView.addTarget(self, action: "videoSliderChangeValue:", forControlEvents: .ValueChanged)
         toolsView.bottomView.videoSliderView.addTarget(self, action: "videoSliderChangeValueEnd:", forControlEvents: .TouchUpInside)
         toolsView.redialBtn.addTarget(self, action: "repeatPlay", forControlEvents: .TouchUpInside)
+        toolsView.bottomView.fullScreenBtn.setImage(UIImage(named: fullScreenImageName), forState: .Normal)
+        toolsView.topView.backBtn.addTarget(self, action: "backBtnClick", forControlEvents: .TouchUpInside)
     }
     /// 初始化播放相关
     private func configSJPlayer(url: NSURL) {
@@ -146,26 +178,37 @@ extension SJPlyerView {
     private func reset() {
         
         isPlayed = false
-        toolsView.bottomView.playBtn.setImage(UIImage(named:playImageName), forState: .Normal)
         isFullScreen = false
-        toolsView.bottomView.fullScreenBtn.setImage(UIImage(named: originalScreenImageName), forState: .Normal)
-        toolsView.bottomView.videoSliderView.value = 0
-        toolsView.bottomView.videoProgressView.progress = 0
+        resetControlView()
+        
         player?.pause()
         playerLayer?.removeFromSuperlayer()
         player?.replaceCurrentItemWithPlayerItem(nil)
         player = nil
-        removeObserver()
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+        
+        if isReplayed == false { self.removeFromSuperview() }
+        
+    }
+    /// 复位控制层
+    private func resetControlView() {
+
+        toolsView.bottomView.playBtn.setImage(UIImage(named:playImageName), forState: .Normal)
+        toolsView.bottomView.fullScreenBtn.setImage(UIImage(named: originalScreenImageName), forState: .Normal)
+        toolsView.bottomView.videoSliderView.value = 0
+        toolsView.bottomView.videoProgressView.progress = 0
     }
     
-    /// 移除所有通知
-    private func removeObserver() {
+    private func removePlayer() {
+        self.removeFromSuperview()
+    }
+    /// 移除KVO
+    private func removeKVO() {
         
-        // 移除所有通知
+        // 移除KVO
         playerItem?.removeObserver(self, forKeyPath: status, context: nil)
         playerItem?.removeObserver(self, forKeyPath: loadedTimeRanges, context: nil)
         player?.removeTimeObserver(playStatusObserve!)
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: AVPlayerItemDidPlayToEndTimeNotification, object: playerItem)
     }
     
 }
@@ -173,15 +216,22 @@ extension SJPlyerView {
 /// 按钮事件
 extension SJPlyerView {
     
+    @objc private func backBtnClick() {
+        
+        resetPlayer()
+        if backOperation != nil { backOperation!() }
+    }
+    
+    
     @objc private func playeBtnClick(btn: UIButton) {
         
         toolsView.redialBtn.hidden = true
         
         if !isPlayed {
-            player?.play()
+            playerLayer!.player!.play()
             btn.setImage(UIImage(named: pauseImageName), forState: .Normal)
         } else {
-            player?.pause()
+            playerLayer!.player!.pause()
             btn.setImage(UIImage(named:playImageName), forState: .Normal)
         }
         isPlayed = !isPlayed
@@ -189,63 +239,72 @@ extension SJPlyerView {
     @objc private func fullScreenBtnClick(btn: UIButton) {
         
         if !isFullScreen {
-            btn.setImage(UIImage(named: fullScreenImageName), forState: .Normal)
-        } else {
             btn.setImage(UIImage(named: originalScreenImageName), forState: .Normal)
+        } else {
+            btn.setImage(UIImage(named: fullScreenImageName), forState: .Normal)
         }
         isFullScreen = !isFullScreen
     }
     
     @objc private func videoSliderChangeValue(sender: UISlider) {
-        player?.pause()
-//        print("change: \(sender.value)")
+        playerLayer!.player!.pause()
         if sender.value == 0.0 {
             // 让其从头开始播放
-            player?.seekToTime(kCMTimeZero, completionHandler: { [unowned self](_) -> Void in
-                self.player?.play()
-                self.toolsView.bottomView.playBtn.setImage(UIImage(named: pauseImageName), forState: .Normal)
-                self.isPlayed = !self.isPlayed
-                })
+            player?.seekToTime(kCMTimeZero, completionHandler: { [weak self](_) -> Void in
+               
+                if let weakSelf = self {
+                    weakSelf.player?.play()
+                    weakSelf.toolsView.bottomView.playBtn.setImage(UIImage(named: pauseImageName), forState: .Normal)
+                    weakSelf.isPlayed = !weakSelf.isPlayed
+                }
+            })
 
         }
     }
     @objc private func videoSliderChangeValueEnd(sender: UISlider) {
         
-//        print("change: \(sender.value)")
         // 计算拖动的位置
         let changeTime = CMTimeMakeWithSeconds(Float64(NSInteger(sender.value)), 1)
         // 从拖动到的位置播放
-        player?.seekToTime(changeTime, completionHandler: { [unowned self](_) -> Void in
-            self.player?.play()
-            self.toolsView.bottomView.playBtn.setImage(UIImage(named:pauseImageName), forState: .Normal)
-            self.isPlayed = true
+        player?.seekToTime(changeTime, completionHandler: { [weak self](_) -> Void in
+            if let weakSelf = self {
+            weakSelf.player?.play()
+            weakSelf.toolsView.bottomView.playBtn.setImage(UIImage(named:pauseImageName), forState: .Normal)
+            weakSelf.toolsView.bottomView.videoSliderView.value = 0
+            weakSelf.toolsView.bottomView.videoProgressView.progress = 0
+            weakSelf.isPlayed = true
+            }
         })
     }
     
     @objc private func moviePlayDidEnd(item: AVPlayerItem) {
         
-//        print("播放完毕")
+        // 播放完毕
         // 回到当初状态
-        player?.seekToTime(kCMTimeZero, completionHandler: { [unowned self] (_) -> Void in
-            self.toolsView.bottomView.videoSliderView.setValue(0.0, animated: true)
-            self.toolsView.bottomView.playBtn.setImage(UIImage(named:playImageName), forState: .Normal)
-            self.isPlayed = false
-            self.toolsView.redialBtn.hidden = false
-            self.removeObserver()
+        playerLayer!.player!.seekToTime(kCMTimeZero, completionHandler: { [weak self] (_) -> Void in
+            if let weakSelf = self {
+                weakSelf.toolsView.bottomView.videoSliderView.setValue(0.0, animated: true)
+                weakSelf.toolsView.bottomView.playBtn.setImage(UIImage(named:playImageName), forState: .Normal)
+                weakSelf.isPlayed = false
+                weakSelf.toolsView.redialBtn.hidden = false
+                weakSelf.removeKVO()
+            }
         })
     }
     
     @objc private func repeatPlay() {
-        print("重拨")
         toolsView.redialBtn.hidden = true
-        
+        isReplayed = true
+        resetPlayer()
+        configSJPlayer(url!)
+        Play()
     }
 }
 
 /// 通知相关
 extension SJPlyerView {
     
-    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override public func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         let item: AVPlayerItem = object as! AVPlayerItem
         
         if keyPath == status {
@@ -264,7 +323,7 @@ extension SJPlyerView {
                 // 监听播放状态
                 observePlayStatus(item)
             } else if item.status == .Failed {
-                print("播放失败")
+//                print("播放失败")
             }
             
         } else if keyPath == loadedTimeRanges {
@@ -279,17 +338,20 @@ extension SJPlyerView {
     
     private func observePlayStatus(item: AVPlayerItem) {
         
-        playStatusObserve = player?.addPeriodicTimeObserverForInterval(CMTime(value: 1, timescale: 1), queue: dispatch_get_main_queue(), usingBlock: { [unowned self] (time) -> Void in
+        playStatusObserve = player?.addPeriodicTimeObserverForInterval(CMTime(value: 1, timescale: 1), queue: dispatch_get_main_queue(), usingBlock: { [weak self] (time) -> Void in
+            
+            if let weakSelf = self {
             // 当前第几秒
             let currentSecond = item.currentTime().value / CMTimeValue(item.currentTime().timescale)
-            self.toolsView.bottomView.videoSliderView.setValue(Float(currentSecond), animated: true)
-            let timeStr = self.dealTime(currentSecond)
-            self.toolsView.bottomView.currentPlayTimeLabel.text = timeStr
-            self.toolsView.bottomView.totalPlayTimeLabel.text = self.totalTime
+            weakSelf.toolsView.bottomView.videoSliderView.setValue(Float(currentSecond), animated: true)
+            let timeStr = weakSelf.dealTime(currentSecond)
+            weakSelf.toolsView.bottomView.currentPlayTimeLabel.text = timeStr
+            weakSelf.toolsView.bottomView.totalPlayTimeLabel.text = weakSelf.totalTime
             
-            if self.isFilePlay == true {
-            let progress = Float(currentSecond) / Float(self.toolsView.bottomView.videoSliderView.sj_width)
-            self.toolsView.bottomView.videoProgressView.setProgress(progress, animated: true)
+            if weakSelf.isFilePlay == true {
+                let progress = Float(currentSecond) / Float(weakSelf.toolsView.bottomView.videoSliderView.sj_width)
+                weakSelf.toolsView.bottomView.videoProgressView.setProgress(progress, animated: true)
+                }
             }
         })
         

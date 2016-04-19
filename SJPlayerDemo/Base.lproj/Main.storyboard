@@ -9,6 +9,7 @@
         <scene sceneID="bnl-Q9-Qbd">
             <objects>
                 <navigationController id="i0d-ns-PGA" sceneMemberID="viewController">
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Bw0-24-Sde">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -19,7 +20,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vMv-g0-fuQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1060" y="32"/>
+            <point key="canvasLocation" x="-894" y="-128"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="Zjp-j1-3yu">
@@ -30,18 +31,18 @@
                         <viewControllerLayoutGuide type="bottom" id="qum-IH-61l"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="c4O-2h-1u9">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iLT-fi-XRC">
-                                <rect key="frame" x="270" y="285" width="60" height="30"/>
+                                <rect key="frame" x="130" y="269" width="60" height="30"/>
                                 <state key="normal" title="播放本地"/>
                                 <connections>
                                     <action selector="playLocal" destination="tl3-AL-BaC" eventType="touchUpInside" id="99y-Hi-Hgn"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="s77-Bk-Vji">
-                                <rect key="frame" x="270" y="351" width="60" height="30"/>
+                                <rect key="frame" x="130" y="335" width="60" height="30"/>
                                 <state key="normal" title="播放网络"/>
                                 <connections>
                                     <action selector="playNetwork" destination="tl3-AL-BaC" eventType="touchUpInside" id="gB0-eR-M5V"/>
@@ -62,43 +63,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="21M-Pv-S1G" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-252" y="-128"/>
-        </scene>
-        <!--Player View Controller-->
-        <scene sceneID="tne-QT-ifu">
-            <objects>
-                <viewController id="BYZ-38-t0r" customClass="PlayerViewController" customModule="SJPlayerDemo" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
-                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7AG-8g-qbV">
-                                <rect key="frame" x="150" y="200" width="300" height="200"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="AaY-a2-0Fz"/>
-                                    <constraint firstAttribute="width" constant="300" id="eQ7-4C-Uec"/>
-                                </constraints>
-                            </view>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="7AG-8g-qbV" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="hYH-KF-Pus"/>
-                            <constraint firstItem="7AG-8g-qbV" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="tjG-Mf-kec"/>
-                        </constraints>
-                    </view>
-                    <nil key="simulatedStatusBarMetrics"/>
-                    <connections>
-                        <outlet property="playerView" destination="7AG-8g-qbV" id="RNO-rO-EFE"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="416" y="23"/>
+            <point key="canvasLocation" x="-552" y="-128"/>
         </scene>
     </scenes>
 </document>

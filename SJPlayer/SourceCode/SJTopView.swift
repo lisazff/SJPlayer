@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SJTopView : UIView {
+public class SJTopView : UIView {
 
     /// 返回按钮
    public private(set) lazy var backBtn: UIButton = {
@@ -27,19 +27,19 @@ class SJTopView : UIView {
         InitializeUI()
     }
 
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         InitializeUI()
         
     }
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         
         bgImageView.frame = self.bounds
         titleLabe.frame = self.bounds
         backBtn.sj_x = 20
-        backBtn.sj_width = self.sj_height - 5
-        backBtn.sj_height = self.sj_height - 5
+        backBtn.sj_width = self.sj_height - 10
+        backBtn.sj_height = self.sj_height - 10
         backBtn.sj_centerY = self.sj_centerY
     }
 

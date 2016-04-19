@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SJBottomView : UIView {
+public class SJBottomView : UIView {
 
     /// 播放按钮
     public private(set) lazy var playBtn = UIButton()
@@ -31,12 +31,12 @@ class SJBottomView : UIView {
         InitializeUI()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         InitializeUI()
         
     }
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         
         bgImageView.frame = self.bounds
