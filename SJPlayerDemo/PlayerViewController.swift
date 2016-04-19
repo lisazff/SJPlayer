@@ -26,7 +26,7 @@ class PlayerViewController: UIViewController {
         btn.frame = CGRect(x: 100, y: 500, width: 100, height: 50)
         btn.addTarget(self, action: "playNext", forControlEvents: .TouchUpInside)
         view.addSubview(btn)
-        
+
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -56,9 +56,9 @@ class PlayerViewController: UIViewController {
     
     func playNext() {
         
+        if playerView.playStatus == SJPlyerViewStatus.ReadyToPlay {
         let  urlStr = "/Users/king/Pictures/好酷的舞蹈哦！.mp4"
-
         playerView.replaceWithURL(NSURL(fileURLWithPath: urlStr), isfileplay: true)
-
+        }
     }
 }

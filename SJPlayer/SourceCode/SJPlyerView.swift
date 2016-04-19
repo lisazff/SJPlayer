@@ -11,6 +11,14 @@ import AVFoundation
 
 typealias backBlock = () -> ()
 
+
+public enum SJPlyerViewStatus : Int {
+    
+    case Unknown
+    case ReadyToPlay
+    case Failed
+}
+
 /****************    公开方法      ************/
 extension SJPlyerView {
     
@@ -83,9 +91,12 @@ extension SJPlyerView {
 
 public class SJPlyerView : UIView {
     
-    private var url: NSURL?
     /// 操作层
     public private(set) lazy var toolsView: SJToolsView = SJToolsView()
+    /// 状态
+    public private(set) var playStatus: SJPlyerViewStatus?
+    
+    private var url: NSURL?
 
     private var player: AVPlayer? {
         get {
@@ -283,8 +294,9 @@ extension SJPlyerView {
         // 回到当初状态
         playerLayer!.player!.seekToTime(kCMTimeZero, completionHandler: { [weak self] (_) -> Void in
             if let weakSelf = self {
-                weakSelf.toolsView.bottomView.videoSliderView.setValue(0.0, animated: true)
-                weakSelf.toolsView.bottomView.playBtn.setImage(UIImage(named:playImageName), forState: .Normal)
+//                weakSelf.toolsView.bottomView.videoSliderView.setValue(0.0, animated: true)
+//                weakSelf.toolsView.bottomView.playBtn.setImage(UIImage(named:playImageName), forState: .Normal)
+                weakSelf.resetControlView()
                 weakSelf.isPlayed = false
                 weakSelf.toolsView.redialBtn.hidden = false
                 weakSelf.removeKVO()
@@ -309,7 +321,7 @@ extension SJPlyerView {
         
         if keyPath == status {
             if item.status == .ReadyToPlay {
-                
+                playStatus = SJPlyerViewStatus.ReadyToPlay
                 print("可以播放")
                 toolsView.bottomView.playBtn.enabled = true
                 // 获取视频的总长度
@@ -323,7 +335,10 @@ extension SJPlyerView {
                 // 监听播放状态
                 observePlayStatus(item)
             } else if item.status == .Failed {
+                playStatus = SJPlyerViewStatus.Failed
 //                print("播放失败")
+            } else if item.status == .Unknown {
+                playStatus = SJPlyerViewStatus.Unknown
             }
             
         } else if keyPath == loadedTimeRanges {
