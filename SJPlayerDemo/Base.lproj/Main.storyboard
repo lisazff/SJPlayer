@@ -64,10 +64,10 @@
             </objects>
             <point key="canvasLocation" x="-252" y="-128"/>
         </scene>
-        <!--View Controller-->
+        <!--Player View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="PlayerViewController" customModule="SJPlayerDemo" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -76,20 +76,25 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7AG-8g-qbV" customClass="SJPlyerView" customModule="SJPlayerDemo" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7AG-8g-qbV">
+                                <rect key="frame" x="150" y="200" width="300" height="200"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="AaY-a2-0Fz"/>
+                                    <constraint firstAttribute="width" constant="300" id="eQ7-4C-Uec"/>
+                                </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="7AG-8g-qbV" secondAttribute="bottom" id="BsL-Of-BdI"/>
-                            <constraint firstAttribute="trailing" secondItem="7AG-8g-qbV" secondAttribute="trailing" id="Wch-ai-oG5"/>
-                            <constraint firstItem="7AG-8g-qbV" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="aPG-vj-kaN"/>
-                            <constraint firstItem="7AG-8g-qbV" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="zOk-7h-9su"/>
+                            <constraint firstItem="7AG-8g-qbV" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="hYH-KF-Pus"/>
+                            <constraint firstItem="7AG-8g-qbV" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="tjG-Mf-kec"/>
                         </constraints>
                     </view>
                     <nil key="simulatedStatusBarMetrics"/>
+                    <connections>
+                        <outlet property="playerView" destination="7AG-8g-qbV" id="RNO-rO-EFE"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

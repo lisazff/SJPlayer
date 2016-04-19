@@ -16,7 +16,7 @@ class SJLable : UILabel {
         InitializeUI()
     }
     
-    required public init?(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         InitializeUI()
         

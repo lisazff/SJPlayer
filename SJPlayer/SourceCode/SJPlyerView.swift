@@ -15,21 +15,24 @@ extension SJPlyerView {
     /**
      播放
      */
-    public func plyerViewPlay() {
+    public func Play() {
         
         player?.play()
     }
     /**
      暂停
      */
-    public func plyerViewPause() {
+    public func Pause() {
         player?.pause()
     }
     /**
      重播
      */
-    public func plyerViewRedial() {
+    public func Redial() {
         repeatPlay()
+    }
+    public func resetPlayer() {
+        reset()
     }
 }
 
@@ -40,8 +43,7 @@ class SJPlyerView : UIView {
         didSet {
             if let url = url {
             isFilePlay = false
-            resetPlayer()
-            InitializePlay(url)
+            configSJPlayer(url)
             }
         }
     }
@@ -49,8 +51,7 @@ class SJPlyerView : UIView {
         didSet{
             if let fileUrl = fileUrl {
             isFilePlay = true
-            resetPlayer()
-            InitializePlay(fileUrl)
+            configSJPlayer(fileUrl)
             }
         }
     }
@@ -74,6 +75,7 @@ class SJPlyerView : UIView {
     private var playStatusObserve: AnyObject?
     private lazy var dateFormatter = NSDateFormatter()
     private var playerItem: AVPlayerItem?
+    private var playerLayer: AVPlayerLayer?
     
     
     
@@ -111,7 +113,6 @@ extension SJPlyerView {
     /// 初始化UI
     private func InitializeUI() {
         
-        (self.layer as! AVPlayerLayer).videoGravity = AVLayerVideoGravityResizeAspectFill
         addSubview(toolsView)
         toolsView.backgroundColor = UIColor.clearColor()
         toolsView.bottomView.playBtn.enabled = false
@@ -122,30 +123,44 @@ extension SJPlyerView {
         toolsView.redialBtn.addTarget(self, action: "repeatPlay", forControlEvents: .TouchUpInside)
     }
     /// 初始化播放相关
-    private func InitializePlay(url: NSURL) {
+    private func configSJPlayer(url: NSURL) {
         
+            // 初始化
             playerItem = AVPlayerItem(URL: url)
+            // 创建player
+            player = AVPlayer(playerItem: playerItem!)
+            // 初始化playerLayer
+            playerLayer = AVPlayerLayer(player: player)
+            // 设置填充模式
+            playerLayer?.videoGravity = AVLayerVideoGravityResizeAspect
+            layer.insertSublayer(playerLayer!, atIndex: 0)
             /// 监听状态
             playerItem!.addObserver(self, forKeyPath: status, options: .New, context: nil)
             /// 监听缓冲进度
             playerItem!.addObserver(self, forKeyPath: loadedTimeRanges, options: .New, context: nil)
-            player = AVPlayer(playerItem: playerItem!)
             toolsView.bottomView.playBtn.enabled = false
             /// 监听播放完毕通知
             NSNotificationCenter.defaultCenter().addObserver(self, selector: "moviePlayDidEnd:", name: AVPlayerItemDidPlayToEndTimeNotification, object: playerItem!)
     }
     /// 复位
-    private func resetPlayer() {
+    private func reset() {
         
+        isPlayed = false
+        toolsView.bottomView.playBtn.setImage(UIImage(named:playImageName), forState: .Normal)
+        isFullScreen = false
+        toolsView.bottomView.fullScreenBtn.setImage(UIImage(named: originalScreenImageName), forState: .Normal)
+        toolsView.bottomView.videoSliderView.value = 0
+        toolsView.bottomView.videoProgressView.progress = 0
         player?.pause()
+        playerLayer?.removeFromSuperlayer()
+        player?.replaceCurrentItemWithPlayerItem(nil)
         player = nil
-        playerItem = nil
+        removeObserver()
     }
     
     /// 移除所有通知
     private func removeObserver() {
         
-        resetPlayer()
         // 移除所有通知
         playerItem?.removeObserver(self, forKeyPath: status, context: nil)
         playerItem?.removeObserver(self, forKeyPath: loadedTimeRanges, context: nil)
@@ -279,6 +294,7 @@ extension SJPlyerView {
         })
         
     }
+    
     
     private func dealTime(time: CMTimeValue) -> String {
         
